@@ -23,6 +23,7 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 - Kernel Modules
 - Online Users
 - Last logins
+- Privileged Users
 - Non-System Users
 - Crontabs
 - Temp directory
@@ -32,6 +33,8 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 - Jobs
 - Open files
 - Open Connections
+- Fstab
+- Mounts
 
 ### User
 
