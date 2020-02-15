@@ -122,11 +122,15 @@ system(){
   echo "Report generated at `date`" >> $SYSREPORT
   echo "Running as `whoami`" >> $SYSREPORT
   ( for i in \
-  "uptime" \
-  "du -sh /" \
-  "fdisk -l" \
   "uname -a" \
+  "uptime" \
+  "df -h" \
+  "fdisk -l" \
+  "mount -l" \
   "free -m" \
+  "cat /etc/fstab" \
+  "lsusb" \
+  "lsmod" \
   "env" \
   "echo $LD_PRELOAD" \
   "hostname" \
@@ -138,12 +142,11 @@ system(){
   "cat /etc/hosts" \
   "cat /etc/resolv.conf" \
   "ss -putan" \
-  "lsusb" \
-  "lsmod" \
   "lastlog" \
   "who -a" \
-  "cat /etc/sudoers" \
+  "grep -E ':0+' /etc/passwd" \
   "getent passwd {1000..65535}" \
+  "cat /etc/sudoers" \
   "ls -lrth /etc/cron.d" \
   "ls -lrth /etc/cron.hourly" \
   "ls -lrth /etc/cron.daily" \
