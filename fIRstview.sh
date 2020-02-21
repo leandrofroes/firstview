@@ -31,8 +31,6 @@ SYNOPSIS:
 
 OPTIONS:
 
-    -o, --output OUTPUT
-          Specify the report output directory.
     -u,--user USER
           Specify the user which you want to investigate.
     -p,--pid PID
@@ -52,8 +50,10 @@ if [ $# -eq 0  ]; then
   exit 1
 fi
 
+OUTDIR=.
+
 f(){
-  FILEREPORT=$OUT/$(echo $FILE | rev | cut -d/ -f1 | rev)-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  FILEREPORT=$OUTDIR/$(echo $FILE | rev | cut -d/ -f1 | rev)-report-$(date +"%Y-%m-%d-%I-%M%p").log
   echo "Report generated at `date`" >> $FILEREPORT
   echo "Running as `whoami`" >> $FILEREPORT
   ( for i in \
@@ -72,7 +72,7 @@ f(){
 }
 
 user(){
-  USERREPORT=$OUT/$USR-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  USERREPORT=$OUTDIR/$USR-report-$(date +"%Y-%m-%d-%I-%M%p").log
   echo "Report generated at `date`" >> $USERREPORT
   echo "Running as `whoami`" >> $USERREPORT
   ( for i in \
@@ -96,13 +96,13 @@ user(){
     eval $i 2>&-
   done) >> $USERREPORT
 
-  cat /home/$USR/.bash_history > $OUT/$USR-history-$(date +"%Y-%m-%d-%I-%M%p").log
-  echo "[+] User history dumped at $OUT"
+  cat /home/$USR/.bash_history > $OUTDIR/$USR-history-$(date +"%Y-%m-%d-%I-%M%p").log
+  echo "[+] User history dumped at $OUTDIR"
 
 }
 
 pid(){
-  PIDREPORT=$OUT/$(ps -p $PID -o %c | tail -1)-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  PIDREPORT=$OUTDIR/$(ps -p $PID -o %c | tail -1)-report-$(date +"%Y-%m-%d-%I-%M%p").log
   echo "Report generated at `date`" >> $PIDREPORT
   echo "Running as `whoami`" >> $PIDREPORT
   ( for i in \
@@ -118,7 +118,7 @@ pid(){
 }
 
 system(){
-  SYSREPORT=$OUT/system-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  SYSREPORT=$OUTDIR/system-report-$(date +"%Y-%m-%d-%I-%M%p").log
   echo "Report generated at `date`" >> $SYSREPORT
   echo "Running as `whoami`" >> $SYSREPORT
   ( for i in \
@@ -166,18 +166,11 @@ system(){
   done) >> $SYSREPORT
 }
 
-while getopts o:u:p:f:sh opt; do
+while getopts u:p:f:sh opt; do
   case "$opt" in
-    o|--output) OUT=$OPTARG
-                if [ ! -d $OUT ]; then
-                  echo "ERROR: The output directory does not exist.";
-                  exit 1;
-                fi
-                ;;
     u|--user)   USR=$OPTARG
                 if grep -qw ^$USR /etc/passwd; then
                   user
-                  exit 0
                 else
                   echo "ERROR: This user does not exist.";
                   exit 1
@@ -186,7 +179,6 @@ while getopts o:u:p:f:sh opt; do
     p|--pid)    PID=$OPTARG
                 if ps -p $PID > /dev/null; then
                   pid
-                  exit 0
                 else
                   echo "ERROR: This pid does not exist.";
                   exit 1
@@ -198,13 +190,14 @@ while getopts o:u:p:f:sh opt; do
                   exit 1;
                 fi
                 f
-                exit 0
                 ;;
     s|--system) system
-                exit 0
                 ;;
     h|--help)   usage
                 exit 0
                 ;;
   esac
 done
+
+echo "[+] Done!"
+exit 0
