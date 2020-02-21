@@ -50,10 +50,8 @@ if [ $# -eq 0  ]; then
   exit 1
 fi
 
-OUTDIR=.
-
 f(){
-  FILEREPORT=$OUTDIR/$(echo $FILE | rev | cut -d/ -f1 | rev)-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  FILEREPORT=$(echo $FILE | rev | cut -d/ -f1 | rev)-report-$(date +"%Y-%m-%d-%I-%M%p").log
   echo "Report generated at `date`" >> $FILEREPORT
   echo "Running as `whoami`" >> $FILEREPORT
   ( for i in \
@@ -72,7 +70,7 @@ f(){
 }
 
 user(){
-  USERREPORT=$OUTDIR/$USR-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  USERREPORT=$USR-report-$(date +"%Y-%m-%d-%I-%M%p").log
   echo "Report generated at `date`" >> $USERREPORT
   echo "Running as `whoami`" >> $USERREPORT
   ( for i in \
@@ -96,13 +94,13 @@ user(){
     eval $i 2>&-
   done) >> $USERREPORT
 
-  cat /home/$USR/.bash_history > $OUTDIR/$USR-history-$(date +"%Y-%m-%d-%I-%M%p").log
-  echo "[+] User history dumped at $OUTDIR"
+  cat /home/$USR/.bash_history > $USR-history-$(date +"%Y-%m-%d-%I-%M%p").log
+  echo "[+] User history dumped at $PWD"
 
 }
 
 pid(){
-  PIDREPORT=$OUTDIR/$(ps -p $PID -o %c | tail -1)-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  PIDREPORT=$(ps -p $PID -o %c | tail -1)-report-$(date +"%Y-%m-%d-%I-%M%p").log
   echo "Report generated at `date`" >> $PIDREPORT
   echo "Running as `whoami`" >> $PIDREPORT
   ( for i in \
@@ -118,7 +116,7 @@ pid(){
 }
 
 system(){
-  SYSREPORT=$OUTDIR/system-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  SYSREPORT=system-report-$(date +"%Y-%m-%d-%I-%M%p").log
   echo "Report generated at `date`" >> $SYSREPORT
   echo "Running as `whoami`" >> $SYSREPORT
   ( for i in \
