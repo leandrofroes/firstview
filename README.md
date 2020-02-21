@@ -70,8 +70,6 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 ## **Options**
 
 ```
-    -o, --output OUTPUT
-          Specify the report output directory.
     -u,--user USER     
           Specify the user which you want to investigate.
     -p,--pid PID      
@@ -87,7 +85,7 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 ## **Usage**
 
 ```
-./fIRstview.sh -o <output_dir> -f /bin/ls
+./fIRstview.sh -f /bin/ls
 ```
 
 ## **License**
