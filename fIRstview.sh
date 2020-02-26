@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-[[ $EUID -ne 0 ]] || echo "[+] Running as non-root user!"
+[[ $EUID -ne 0 ]] && echo "[+] Running as a non-root user!"
 
 usage(){
 cat << EOF
@@ -27,18 +27,18 @@ NAME:
     fIRstview - fIRstview is a Linux Incident Response tool that gives you a first view and collects useful information to your Forensic Analysis.
 
 SYNOPSIS:
-    fIRstview.sh [-h] [-a] [-s] [-o OUTPUT] [-u USER] [-p PID] [-f FILE]
+    fIRstview.sh [-h] [-a] [-u USER] [-p PID] [-f FILE]
 
 OPTIONS:
 
     -u,--user USER
-          Specify the user which you want to investigate.
+          Specify the user which you want to investigate and generate a report.
     -p,--pid PID
-          Specify the process which you want to investigate
+          Specify the process which you want to investigate and generate a report.
     -f,--file FILE
-          Specify a file which you want to investigate.
-    -s,--system
-          Display system information.
+          Specify a file which you want to investigate and generate a report.
+    -a,--all
+          Generate a full report with no filter.
     -h,--help
           Display this help menu.
 
@@ -55,8 +55,8 @@ f(){
   echo "Report generated at `date`" >> $FILEREPORT
   echo "Running as `whoami`" >> $FILEREPORT
   ( for i in \
-  "ls -l $FILE" \
-  "file $FILE" \
+  "ls -la $FILE" \
+  "file -p $FILE" \
   "stat $FILE" \
   "lsof $FILE" \
   "find / -type f -name $FILE -exec ls -l {} +" \
@@ -76,18 +76,18 @@ user(){
   ( for i in \
   "id $USR" \
   "who -a | grep $USR" \
+  "lastlog | grep $USR" \
   "ls -rthla ~$USR" \
-  "lsof -u $USR" \
   "cat ~$USR/.ssh/known_hosts" \
   "cat ~$USR/.bashrc" \
   "cat ~$USR/.profile" \
   "cat ~$USR/.bash_logout" \
-  "cat /var/spool/cron/crontabs/$USR" \
-  "lsof -i | grep $USR" \
-  "ps -fU $USR" \
-  "lastlog | grep $USR" \
   "grep $USR /etc/passwd" \
   "grep $USR /etc/group"
+  "cat /var/spool/cron/crontabs/$USR" \
+  "lsof -u $USR" \
+  "lsof -i | grep $USR" \
+  "ps -fU $USR" \
 
   do
     echo -e "\n\n[+] $i\n-----------------------------------"
@@ -95,7 +95,7 @@ user(){
   done) >> $USERREPORT
 
   cat /home/$USR/.bash_history > $USR-history-$(date +"%Y-%m-%d-%I-%M%p").log
-  echo "[+] User history dumped at $PWD"
+  echo "[+] User history dumped at fIRstview directory."
 
 }
 
@@ -104,9 +104,13 @@ pid(){
   echo "Report generated at `date`" >> $PIDREPORT
   echo "Running as `whoami`" >> $PIDREPORT
   ( for i in \
+  "ps -p $PID -wo %p%P%C%x%t%U%u%c%a" \
   "lsof -p $PID" \
-  "ps -p $PID -wo %p%P%x%t%U%u%c%a" \
   "cat /proc/$PID/cmdline" \
+  "cat /proc/$PID/comm" \
+  "ls -la /proc/$PID/exe" \
+  "ls -la /proc/$PID/cwd" \
+  "cat /proc/$PID/environ" \
   "ss -ltp | grep 'pid=$PID'"
 
   do
@@ -115,22 +119,24 @@ pid(){
   done) >> $PIDREPORT
 }
 
-system(){
-  SYSREPORT=system-report-$(date +"%Y-%m-%d-%I-%M%p").log
-  echo "Report generated at `date`" >> $SYSREPORT
-  echo "Running as `whoami`" >> $SYSREPORT
+all(){
+  FULLREPORT=full-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  echo "Report generated at `date`" >> $FULLREPORT
+  echo "Running as `whoami`" >> $FULLREPORT
   ( for i in \
+  "##### SYSTEM #####\n" \
   "uname -a" \
   "uptime" \
   "df -h" \
   "fdisk -l" \
   "mount -l" \
-  "free -m" \
   "cat /etc/fstab" \
+  "free" \
   "lsusb" \
   "lsmod" \
   "env" \
-  "echo $LD_PRELOAD" \
+  "set | grep 'LD_PRELOAD'" \
+  "##### NETWORKING #####\n" \
   "hostname" \
   "ip a" \
   "ip link show" \
@@ -140,8 +146,9 @@ system(){
   "cat /etc/hosts" \
   "cat /etc/resolv.conf" \
   "ss -putan" \
-  "lastlog" \
+  "##### USERS #####\n" \
   "who -a" \
+  "lastlog" \
   "grep -E ':0+' /etc/passwd" \
   "getent passwd {1000..65535}" \
   "cat /etc/sudoers" \
@@ -150,21 +157,29 @@ system(){
   "ls -lrth /etc/cron.daily" \
   "ls -lrth /etc/cron.weekly" \
   "ls -lrth /etc/cron.monthly" \
-  "ls -lrtha /tmp" \
+  "##### PROCESSES AND SERVICES #####\n" \
   "ls -lrth /etc/*.d" \
   "service --status-all" \
-  "ps -ewo %p%P%x%t%U%u%c%a" \
+  "ps -ewo %p%P%C%x%t%U%u%c%a" \
   "jobs -l" \
+  "##### FILES #####\n" \
   "lsof" \
-  "lsof -i"
+  "lsof -i" \
+  "find / \\( -nouser -o -nogroup \\) -exec ls -lah {} +" \
+  "lsattr / -R | grep '\\----i'" \
+  "##### MISC #####\n" \
+  "ls -lrtha /tmp" \
+  "find / -name 'authorized_keys'" \
+  "find /var/log -size 0b -exec ls -lah {} +" \
+  "find / -type p -exec ls -lah {} +"
 
   do
     echo -e "\n\n[+] $i\n-----------------------------------"
     eval $i 2>&-
-  done) >> $SYSREPORT
+  done) >> $FULLREPORT
 }
 
-while getopts u:p:f:sh opt; do
+while getopts u:p:f:ah opt; do
   case "$opt" in
     u|--user)   USR=$OPTARG
                 if grep -qw ^$USR /etc/passwd; then
@@ -189,7 +204,7 @@ while getopts u:p:f:sh opt; do
                 fi
                 f
                 ;;
-    s|--system) system
+    a|--all) all
                 ;;
     h|--help)   usage
                 exit 0
@@ -197,5 +212,6 @@ while getopts u:p:f:sh opt; do
   esac
 done
 
+echo "[+] Report generated at fIRstview directory."
 echo "[+] Done!"
 exit 0
