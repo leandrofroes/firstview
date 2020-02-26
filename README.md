@@ -4,7 +4,7 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 
 ## **Features**
 
-### System
+### All module
 
 - Uptime
 - Disk usage
@@ -35,8 +35,13 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 - Open Connections
 - Fstab
 - Mounts
+- Unusual authorized keys location
+- 0 bytes log files
+- Files/directories with no user or no group
+- Immutable files/directories
+- Pipe files
 
-### User
+### User module
 
 - ID
 - General info (id, shell, home directory, etc)
@@ -51,7 +56,7 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 - User processes
 - User connections
 
-### File
+### File module
 
 - General info (permissions, creator, size, etc)
 - MAC info (modification, access, creation)
@@ -60,25 +65,29 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 - MD5
 - SHA1
 
-### Process
+### Process module
 
 - Process information (name, pid, ppid, time, command, etc)
 - Files opened by the process
 - Process command line
+- Process command
+- Process binary
+- Process working directory
+- Process environment
 - Process connections
 
 ## **Options**
 
 ```
-    -u,--user USER     
-          Specify the user which you want to investigate.
-    -p,--pid PID      
-          Specify the process which you want to investigate.
+    -u,--user USER
+          Specify the user which you want to investigate and generate a report.
+    -p,--pid PID
+          Specify the process which you want to investigate and generate a report.
     -f,--file FILE
-          Specify a file which you want to investigate.
-    -s,--system
-          Display system information.
-    -h,--help          
+          Specify a file which you want to investigate and generate a report.
+    -a,--all
+          Generate a full report with no filter.
+    -h,--help
           Display this help menu.
 ```
 
@@ -87,6 +96,34 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 ```
 ./fIRstview.sh -f /bin/ls
 ```
+
+## Version 0.2 new features:
+
+### All module:
+
+- Unusual authorized keys location
+- 0 bytes log files
+- Files/directories with no user or no group
+- Immutable files/directories
+- Pipe files
+- Add CPU usage to ps command
+
+### Process module:
+
+- Process command
+- Process binary
+- Process working directory
+- Process environment
+- Add CPU usage to ps command
+
+### File module:
+
+- Add -p option to file command to preserve timestamp.
+
+### General:
+
+- The commands now are organized in a logical way, making easier to analyse them.
+- Fix EUID checking logic
 
 ## **License**
 
