@@ -90,6 +90,14 @@ fIRstview is a Linux Incident Response automation script that collects several a
           Display this help menu.
 ```
 
+## **Installation**
+
+```
+git clone https://github.com/leandrofroes/firstview
+cd firstview
+chmod +x fIRstview.sh
+```
+
 ## **Usage**
 
 ```
