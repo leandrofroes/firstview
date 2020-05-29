@@ -83,7 +83,7 @@ user(){
   "cat ~$USR/.profile" \
   "cat ~$USR/.bash_logout" \
   "grep $USR /etc/passwd" \
-  "grep $USR /etc/group"
+  "grep $USR /etc/group" \
   "cat /var/spool/cron/crontabs/$USR" \
   "lsof -u $USR" \
   "lsof -i | grep $USR" \
@@ -95,7 +95,7 @@ user(){
   done) >> $USERREPORT
 
   cat /home/$USR/.bash_history > $USR-user-history-$(date +"%Y-%m-%d-%I:%M%p").log
-  echo "[+] User history dumped at fIRstview directory."
+  echo "[+] User history dumped at $PWD"
 }
 
 pid(){
@@ -211,6 +211,6 @@ while getopts u:p:f:ah opt; do
   esac
 done
 
-echo "[+] Report generated at fIRstview directory."
 echo "[+] Done!"
+echo "[+] Report generated at $PWD"
 exit 0
