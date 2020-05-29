@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-[[ $EUID -ne 0 ]] && echo "[+] Running as a non-root user!"
+[[ $EUID -ne 0 ]] && echo "[!] Running as a non-root user!"
 
 usage(){
 cat << EOF
@@ -51,7 +51,7 @@ if [ $# -eq 0  ]; then
 fi
 
 f(){
-  FILEREPORT=$(echo $FILE | rev | cut -d/ -f1 | rev)-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  FILEREPORT=$(echo $FILE | rev | cut -d/ -f1 | rev)-file-report-$(date +"%Y-%m-%d-%I:%M%p").log
   echo "Report generated at `date`" >> $FILEREPORT
   echo "Running as `whoami`" >> $FILEREPORT
   ( for i in \
@@ -70,7 +70,7 @@ f(){
 }
 
 user(){
-  USERREPORT=$USR-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  USERREPORT=$USR-report-$(date +"%Y-%m-%d-%I:%M%p").log
   echo "Report generated at `date`" >> $USERREPORT
   echo "Running as `whoami`" >> $USERREPORT
   ( for i in \
@@ -87,20 +87,19 @@ user(){
   "cat /var/spool/cron/crontabs/$USR" \
   "lsof -u $USR" \
   "lsof -i | grep $USR" \
-  "ps -fU $USR" \
+  "ps -fU $USR"
 
   do
     echo -e "\n\n[+] $i\n-----------------------------------"
     eval $i 2>&-
   done) >> $USERREPORT
 
-  cat /home/$USR/.bash_history > $USR-history-$(date +"%Y-%m-%d-%I-%M%p").log
+  cat /home/$USR/.bash_history > $USR-user-history-$(date +"%Y-%m-%d-%I:%M%p").log
   echo "[+] User history dumped at fIRstview directory."
-
 }
 
 pid(){
-  PIDREPORT=$(ps -p $PID -o %c | tail -1)-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  PIDREPORT=$(ps -p $PID -o %c | tail -1)-pid-report-$(date +"%Y-%m-%d-%I:%M%p").log
   echo "Report generated at `date`" >> $PIDREPORT
   echo "Running as `whoami`" >> $PIDREPORT
   ( for i in \
@@ -120,11 +119,11 @@ pid(){
 }
 
 all(){
-  FULLREPORT=full-report-$(date +"%Y-%m-%d-%I-%M%p").log
+  FULLREPORT=full-report-$(date +"%Y-%m-%d-%I:%M%p").log
   echo "Report generated at `date`" >> $FULLREPORT
   echo "Running as `whoami`" >> $FULLREPORT
   ( for i in \
-  "##### SYSTEM #####\n" \
+  "\033[1;36m##### SYSTEM #####\n" \
   "uname -a" \
   "uptime" \
   "df -h" \
@@ -136,7 +135,7 @@ all(){
   "lsmod" \
   "env" \
   "set | grep 'LD_PRELOAD'" \
-  "##### NETWORKING #####\n" \
+  "\033[1;36m##### NETWORKING #####\n" \
   "hostname" \
   "ip a" \
   "ip link show" \
@@ -146,7 +145,7 @@ all(){
   "cat /etc/hosts" \
   "cat /etc/resolv.conf" \
   "ss -putan" \
-  "##### USERS #####\n" \
+  "\033[1;36m##### USERS #####\n" \
   "who -a" \
   "lastlog" \
   "grep -E ':0+' /etc/passwd" \
@@ -157,17 +156,17 @@ all(){
   "ls -lrth /etc/cron.daily" \
   "ls -lrth /etc/cron.weekly" \
   "ls -lrth /etc/cron.monthly" \
-  "##### PROCESSES AND SERVICES #####\n" \
+  "\033[1;36m##### PROCESSES AND SERVICES #####\n" \
   "ls -lrth /etc/*.d" \
   "service --status-all" \
   "ps -ewo %p%P%C%x%t%U%u%c%a" \
   "jobs -l" \
-  "##### FILES #####\n" \
+  "\033[1;36m##### FILES #####\n" \
   "lsof" \
   "lsof -i" \
   "find / \\( -nouser -o -nogroup \\) -exec ls -lah {} +" \
   "lsattr / -R | grep '\\----i'" \
-  "##### MISC #####\n" \
+  "\033[1;36m##### MISC #####\n" \
   "ls -lrtha /tmp" \
   "find / -name 'authorized_keys'" \
   "find /var/log -size 0b -exec ls -lah {} +" \
