@@ -1,6 +1,6 @@
 # fIRstview
 
-fIRstview is a Linux Incident Response automation script that collects several artefacts on your system in order to help you in your Forensic Analysis. Also, it's important to know that there's no dependencies to run it and the report is generated automatically.
+fIRstview is a Debian based Incident Response automation script that collects several artefacts on your system in order to help you in your Forensic Analysis. Also, it's important to know that there's no dependencies to run it and the report is generated automatically.
 
 ## **Features**
 
