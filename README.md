@@ -63,6 +63,7 @@ fIRstview is a Linux Incident Response automation script that collects several a
 - If the file is open
 - MD5
 - SHA1
+- ELF information
 
 ### Process module
 
