@@ -59,7 +59,6 @@ f(){
   "file -p $FILE" \
   "stat $FILE" \
   "lsof $FILE" \
-  "find / -type f -name $FILE -exec ls -l {} +" \
   "md5sum $FILE" \
   "sha1sum $FILE"
 
@@ -207,6 +206,9 @@ while getopts u:p:f:ah opt; do
                 ;;
     h|--help)   usage
                 exit 0
+                ;;
+    *)          usage
+                exit 1
                 ;;
   esac
 done
