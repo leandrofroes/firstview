@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#   fIRstview - fIRstview is a Linux Incident Response tool that gives you a first view and collects useful information to your Forensic Analysis.
+#   fIRstview - fIRstview is a Linux Incident Response automation script that collects several artefacts on your system.
 #
 #   Author: Leandro Fróes
 #
