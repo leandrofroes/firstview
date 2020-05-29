@@ -52,6 +52,7 @@ fi
 
 f(){
   FILEREPORT=$(echo $FILE | rev | cut -d/ -f1 | rev)-file-report-$(date +"%Y-%m-%d-%I:%M%p").log
+  ERRORLOGS=$(echo $FILE | rev | cut -d/ -f1 | rev)-file-report-error-$(date +"%Y-%m-%d-%I:%M%p").log
   echo "Report generated at `date`" >> $FILEREPORT
   echo "Running as `whoami`" >> $FILEREPORT
   ( for i in \
@@ -60,16 +61,18 @@ f(){
   "stat $FILE" \
   "lsof $FILE" \
   "md5sum $FILE" \
-  "sha1sum $FILE"
+  "sha1sum $FILE" \
+  "readelf -a $FILE"
 
   do
     echo -e "\n\n[+] $i\n-----------------------------------"
-    eval $i 2>&-
+    eval $i 2>> $ERRORLOGS
   done) >> $FILEREPORT
 }
 
 user(){
   USERREPORT=$USR-report-$(date +"%Y-%m-%d-%I:%M%p").log
+  ERRORLOGS=$USR-report-error-$(date +"%Y-%m-%d-%I:%M%p").log
   echo "Report generated at `date`" >> $USERREPORT
   echo "Running as `whoami`" >> $USERREPORT
   ( for i in \
@@ -90,7 +93,7 @@ user(){
 
   do
     echo -e "\n\n[+] $i\n-----------------------------------"
-    eval $i 2>&-
+    eval $i 2>> $ERRORLOGS
   done) >> $USERREPORT
 
   cat /home/$USR/.bash_history > $USR-user-history-$(date +"%Y-%m-%d-%I:%M%p").log
@@ -98,9 +101,10 @@ user(){
 }
 
 pid(){
-  PROCREPORT=$PID-process-report-$(date +"%Y-%m-%d-%I:%M%p").log
-  echo "Report generated at `date`" >> $PROCREPORT
-  echo "Running as `whoami`" >> $PROCREPORT
+  PIDREPORT=$PID-pid-report-$(date +"%Y-%m-%d-%I:%M%p").log
+  ERRORLOGS=$PID-pid-report-error$(date +"%Y-%m-%d-%I:%M%p").log
+  echo "Report generated at `date`" >> $PIDREPORT
+  echo "Running as `whoami`" >> $PIDREPORT
   ( for i in \
   "ps -p $PID -wo %p%P%C%x%t%U%u%c%a" \
   "lsof -p $PID" \
@@ -113,12 +117,13 @@ pid(){
 
   do
     echo -e "\n\n[+] $i\n-----------------------------------"
-    eval $i 2>&-
-  done) >> $PROCREPORT
+    eval $i 2>> $ERRORLOGS
+  done) >> $PIDREPORT
 }
 
 all(){
   FULLREPORT=full-report-$(date +"%Y-%m-%d-%I:%M%p").log
+  ERRORLOGS=full-report-error$(date +"%Y-%m-%d-%I:%M%p").log
   echo "Report generated at `date`" >> $FULLREPORT
   echo "Running as `whoami`" >> $FULLREPORT
   ( for i in \
@@ -173,7 +178,7 @@ all(){
 
   do
     echo -e "\n\n[+] $i\n-----------------------------------"
-    eval $i 2>&-
+    eval $i 2>> $ERRORLOGS
   done) >> $FULLREPORT
 }
 
@@ -213,6 +218,6 @@ while getopts u:p:f:ah opt; do
   esac
 done
 
-echo "[+] Done!"
 echo "[+] Report generated at $PWD"
+echo "[+] Done!"
 exit 0
