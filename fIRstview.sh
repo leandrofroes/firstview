@@ -98,9 +98,9 @@ user(){
 }
 
 pid(){
-  PIDREPORT=$(ps -p $PID -o %c | tail -1)-pid-report-$(date +"%Y-%m-%d-%I:%M%p").log
-  echo "Report generated at `date`" >> $PIDREPORT
-  echo "Running as `whoami`" >> $PIDREPORT
+  PROCREPORT=$PID-process-report-$(date +"%Y-%m-%d-%I:%M%p").log
+  echo "Report generated at `date`" >> $PROCREPORT
+  echo "Running as `whoami`" >> $PROCREPORT
   ( for i in \
   "ps -p $PID -wo %p%P%C%x%t%U%u%c%a" \
   "lsof -p $PID" \
@@ -114,7 +114,7 @@ pid(){
   do
     echo -e "\n\n[+] $i\n-----------------------------------"
     eval $i 2>&-
-  done) >> $PIDREPORT
+  done) >> $PROCREPORT
 }
 
 all(){
@@ -122,7 +122,7 @@ all(){
   echo "Report generated at `date`" >> $FULLREPORT
   echo "Running as `whoami`" >> $FULLREPORT
   ( for i in \
-  "\033[1;36m##### SYSTEM #####\n" \
+  "##### SYSTEM #####\n" \
   "uname -a" \
   "uptime" \
   "df -h" \
@@ -134,7 +134,7 @@ all(){
   "lsmod" \
   "env" \
   "set | grep 'LD_PRELOAD'" \
-  "\033[1;36m##### NETWORKING #####\n" \
+  "##### NETWORKING #####\n" \
   "hostname" \
   "ip a" \
   "ip link show" \
@@ -144,7 +144,7 @@ all(){
   "cat /etc/hosts" \
   "cat /etc/resolv.conf" \
   "ss -putan" \
-  "\033[1;36m##### USERS #####\n" \
+  "##### USERS #####\n" \
   "who -a" \
   "lastlog" \
   "grep -E ':0+' /etc/passwd" \
@@ -155,17 +155,17 @@ all(){
   "ls -lrth /etc/cron.daily" \
   "ls -lrth /etc/cron.weekly" \
   "ls -lrth /etc/cron.monthly" \
-  "\033[1;36m##### PROCESSES AND SERVICES #####\n" \
+  "##### PROCESSES AND SERVICES #####\n" \
   "ls -lrth /etc/*.d" \
   "service --status-all" \
   "ps -ewo %p%P%C%x%t%U%u%c%a" \
   "jobs -l" \
-  "\033[1;36m##### FILES #####\n" \
+  "##### FILES #####\n" \
   "lsof" \
   "lsof -i" \
   "find / \\( -nouser -o -nogroup \\) -exec ls -lah {} +" \
   "lsattr / -R | grep '\\----i'" \
-  "\033[1;36m##### MISC #####\n" \
+  "##### MISC #####\n" \
   "ls -lrtha /tmp" \
   "find / -name 'authorized_keys'" \
   "find /var/log -size 0b -exec ls -lah {} +" \
