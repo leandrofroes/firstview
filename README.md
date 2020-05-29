@@ -1,6 +1,6 @@
 # fIRstview
 
-fIRstview is a Linux Incident Response tool that gives you a first view and collects useful information to your Forensic Analysis. Also, it's important to know that there's no dependencies to run it and the report is generated automatically.
+fIRstview is a Linux Incident Response automation script that collects several artefacts on your system in order to help you in your Forensic Analysis. Also, it's important to know that there's no dependencies to run it and the report is generated automatically.
 
 ## **Features**
 
@@ -14,13 +14,13 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 - Environment variables
 - Hostname
 - IP Address
-- Route
+- Route Table
 - ARP
 - Interfaces
 - DNS info
 - Network info
 - USB info
-- Kernel Modules
+- Kernel modules
 - Online Users
 - Last logins
 - Privileged Users
@@ -45,7 +45,7 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 
 - ID
 - General info (id, shell, home directory, etc)
-- Group
+- Groups
 - Last login
 - If the user is online
 - Crontab
@@ -60,7 +60,6 @@ fIRstview is a Linux Incident Response tool that gives you a first view and coll
 
 - General info (permissions, creator, size, etc)
 - MAC info (modification, access, creation)
-- Locations with the same file
 - If the file is open
 - MD5
 - SHA1
