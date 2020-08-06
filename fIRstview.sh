@@ -31,18 +31,18 @@ usage(){
 
 	OPTIONS:
 
-	  -u,--user USER
-		    Specify the user which you want to investigate and generate a report.
-	  -p,--pid PID
-		    Specify the process which you want to investigate and generate a report.
-	  -f,--file FILE
-        Specify a file which you want to investigate and generate a report.
-    -l, --logs
-        Dump several system logs.
-    -a,--all
-        Generate a full report with no filter.
-    -h,--help
-        Display this help menu.
+	-u,--user USER
+		Specify the user which you want to investigate and generate a report.
+	-p,--pid PID
+		Specify the process which you want to investigate and generate a report.
+	-f,--file FILE
+		Specify a file which you want to investigate and generate a report.
+	-l,--logs
+		Dump several system logs.
+	-a,--all
+		Generate a full report with no filter.
+	-h,--help
+		Display this help menu.
 
 EOF
 }
