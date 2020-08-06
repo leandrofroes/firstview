@@ -21,26 +21,28 @@
 [[ $EUID -ne 0 ]] && echo "[!] Running as a non-root user!"
 
 usage(){
-cat << EOF
+    cat << EOF
 
-NAME:
-    fIRstview - fIRstview is a Linux Incident Response tool that gives you a first view and collects useful information to your Forensic Analysis.
+	NAME:
+	    fIRstview - fIRstview is a Linux Incident Response tool that gives you a first view and collects useful information to your Forensic Analysis.
 
-SYNOPSIS:
-    fIRstview.sh [-h] [-a] [-u USER] [-p PID] [-f FILE]
+	SYNOPSIS:
+	    fIRstview.sh [-h] [-a] [-l] [-u USER] [-p PID] [-f FILE]
 
-OPTIONS:
+	OPTIONS:
 
-    -u,--user USER
-          Specify the user which you want to investigate and generate a report.
-    -p,--pid PID
-          Specify the process which you want to investigate and generate a report.
-    -f,--file FILE
-          Specify a file which you want to investigate and generate a report.
+	  -u,--user USER
+		    Specify the user which you want to investigate and generate a report.
+	  -p,--pid PID
+		    Specify the process which you want to investigate and generate a report.
+	  -f,--file FILE
+        Specify a file which you want to investigate and generate a report.
+    -l, --logs
+        Dump several system logs.
     -a,--all
-          Generate a full report with no filter.
+        Generate a full report with no filter.
     -h,--help
-          Display this help menu.
+        Display this help menu.
 
 EOF
 }
@@ -50,174 +52,216 @@ if [ $# -eq 0  ]; then
   exit 1
 fi
 
-f(){
-  FILEREPORT=$(echo $FILE | rev | cut -d/ -f1 | rev)-file-report-$(date +"%Y-%m-%d-%I:%M%p").log
-  ERRORLOGS=$(echo $FILE | rev | cut -d/ -f1 | rev)-file-report-error-$(date +"%Y-%m-%d-%I:%M%p").log
-  echo "Report generated at `date`" >> $FILEREPORT
-  echo "Running as `whoami`" >> $FILEREPORT
-  ( for i in \
-  "ls -la $FILE" \
-  "file -p $FILE" \
-  "stat $FILE" \
-  "lsof $FILE" \
-  "md5sum $FILE" \
-  "sha1sum $FILE" \
-  "readelf -a $FILE"
+OUTDIR="fIRstview_output"
 
-  do
-    echo -e "\n\n[+] $i\n-----------------------------------"
-    eval $i 2>> $ERRORLOGS
-  done) >> $FILEREPORT
+[[ ! -d $OUTDIR ]] && mkdir $OUTDIR
+
+cd $OUTDIR
+
+f(){
+    FILEREPORT=$(echo $FILE | rev | cut -d/ -f1 | rev)-file-report.log
+    ERRORLOG=$(echo $FILE | rev | cut -d/ -f1 | rev)-file-report-error.log
+    echo "Report generated at `date`" >> $FILEREPORT
+    echo "Running as `whoami`" >> $FILEREPORT
+    ( for i in \
+    "ls -la $FILE" \
+    "file -p $FILE" \
+    "stat $FILE" \
+    "lsof $FILE" \
+    "md5sum $FILE" \
+    "sha1sum $FILE" \
+    "readelf -a $FILE"
+
+    do
+        echo -e "\n\n[+] $i\n-----------------------------------"
+        eval $i 2>> $ERRORLOG
+    done) >> $FILEREPORT
 }
 
 user(){
-  USERREPORT=$USR-report-$(date +"%Y-%m-%d-%I:%M%p").log
-  ERRORLOGS=$USR-report-error-$(date +"%Y-%m-%d-%I:%M%p").log
-  echo "Report generated at `date`" >> $USERREPORT
-  echo "Running as `whoami`" >> $USERREPORT
-  ( for i in \
-  "id $USR" \
-  "who -a | grep $USR" \
-  "lastlog | grep $USR" \
-  "ls -rthla ~$USR" \
-  "cat ~$USR/.ssh/known_hosts" \
-  "cat ~$USR/.bashrc" \
-  "cat ~$USR/.profile" \
-  "cat ~$USR/.bash_logout" \
-  "grep $USR /etc/passwd" \
-  "grep $USR /etc/group" \
-  "cat /var/spool/cron/crontabs/$USR" \
-  "lsof -u $USR" \
-  "lsof -i | grep $USR" \
-  "ps -fU $USR"
+    USERREPORT=$USR-report.log
+    ERRORLOG=$USR-report-error.log
+    echo "Report generated at `date`" >> $USERREPORT
+    echo "Running as `whoami`" >> $USERREPORT
+    ( for i in \
+    "id $USR" \
+    "who -a | grep $USR" \
+    "lastlog | grep $USR" \
+    "ls -rthla ~$USR" \
+    "grep $USR /etc/passwd" \
+    "grep $USR /etc/group" \
+    "cat /var/spool/cron/crontabs/$USR" \
+    "lsof -u $USR" \
+    "lsof -i | grep $USR" \
+    "ps -fU $USR"
 
-  do
-    echo -e "\n\n[+] $i\n-----------------------------------"
-    eval $i 2>> $ERRORLOGS
-  done) >> $USERREPORT
+    do
+        echo -e "\n\n[+] $i\n-----------------------------------"
+        eval $i 2>> $ERRORLOG
+    done) >> $USERREPORT
 
-  cat /home/$USR/.bash_history > $USR-user-history-$(date +"%Y-%m-%d-%I:%M%p").log
-  echo "[+] User history dumped at $PWD"
+    cat /home/$USR/.bash_history > $USR-user-history.log
+    cat ~$USR/.ssh/known_hosts > $USR-user-known_hosts.log
+    cat ~$USR/.bashrc > $USR-user-bashrc.log
+    cat ~$USR/.profile > $USR-user-profile.log
+    cat ~$USR/.bash_logout > $USR-user-bash_logout.log
 }
 
 pid(){
-  PIDREPORT=$PID-pid-report-$(date +"%Y-%m-%d-%I:%M%p").log
-  ERRORLOGS=$PID-pid-report-error$(date +"%Y-%m-%d-%I:%M%p").log
-  echo "Report generated at `date`" >> $PIDREPORT
-  echo "Running as `whoami`" >> $PIDREPORT
-  ( for i in \
-  "ps -p $PID -wo %p%P%C%x%t%U%u%c%a" \
-  "lsof -p $PID" \
-  "cat /proc/$PID/cmdline" \
-  "cat /proc/$PID/comm" \
-  "ls -la /proc/$PID/exe" \
-  "ls -la /proc/$PID/cwd" \
-  "cat /proc/$PID/environ" \
-  "ss -ltp | grep 'pid=$PID'"
+    PIDREPORT=$PID-pid-report.log
+    ERRORLOG=$PID-pid-report-error.log
+    echo "Report generated at `date`" >> $PIDREPORT
+    echo "Running as `whoami`" >> $PIDREPORT
+    ( for i in \
+    "ps -p $PID -wo %p%P%C%x%t%U%u%c%a" \
+    "lsof -p $PID" \
+    "cat /proc/$PID/cmdline" \
+    "cat /proc/$PID/comm" \
+    "ls -la /proc/$PID/exe" \
+    "ls -la /proc/$PID/cwd" \
+    "cat /proc/$PID/environ" \
+    "ss -ltp | grep 'pid=$PID'"
 
-  do
-    echo -e "\n\n[+] $i\n-----------------------------------"
-    eval $i 2>> $ERRORLOGS
-  done) >> $PIDREPORT
+    do
+        echo -e "\n\n[+] $i\n-----------------------------------"
+        eval $i 2>> $ERRORLOG
+    done) >> $PIDREPORT
+}
+
+logs(){
+    ERRORLOGS=error_logs.log
+    cat /var/log/dmesg > dmesg.log 2>> $ERRORLOGS
+    cat /var/log/auth.log > auth.log 2>> $ERRORLOGS
+    cat /var/log/dpkg.log > dpkg.log 2>> $ERRORLOGS
+    cat /var/log/kern.log > kern.log 2>> $ERRORLOGS
+    cat /var/log/lastlog > lastlog.log 2>> $ERRORLOGS
+    cat /var/log/syslog > syslog.log 2>> $ERRORLOGS
+    cat /var/log/alternative.log > alternative.log 2>> $ERRORLOGS
+    cat /var/log/cron.log > cron.log 2>> $ERRORLOGS
+    cat /var/log/messages > messages.log 2>> $ERRORLOGS
+    cat /var/log/debug > debug.log 2>> $ERRORLOGS
+    cat /var/log/daemon.log > daemon.log 2>> $ERRORLOGS
+    cat /var/log/boot.log > boot.log 2>> $ERRORLOGS
+    cat /var/log/user.log > user.log 2>> $ERRORLOGS
+    cat /var/log/apache2/access.log > apache_access.log 2>> $ERRORLOGS
 }
 
 all(){
-  FULLREPORT=full-report-$(date +"%Y-%m-%d-%I:%M%p").log
-  ERRORLOGS=full-report-error$(date +"%Y-%m-%d-%I:%M%p").log
-  echo "Report generated at `date`" >> $FULLREPORT
-  echo "Running as `whoami`" >> $FULLREPORT
-  ( for i in \
-  "##### SYSTEM #####\n" \
-  "uname -a" \
-  "uptime" \
-  "df -h" \
-  "fdisk -l" \
-  "mount -l" \
-  "cat /etc/fstab" \
-  "free" \
-  "lsusb" \
-  "lsmod" \
-  "env" \
-  "set | grep 'LD_PRELOAD'" \
-  "##### NETWORKING #####\n" \
-  "hostname" \
-  "ip a" \
-  "ip link show" \
-  "cat /etc/network/interfaces" \
-  "ip r s" \
-  "ip n" \
-  "cat /etc/hosts" \
-  "cat /etc/resolv.conf" \
-  "ss -putan" \
-  "##### USERS #####\n" \
-  "who -a" \
-  "lastlog" \
-  "grep -E ':0+' /etc/passwd" \
-  "getent passwd {1000..65535}" \
-  "cat /etc/sudoers" \
-  "ls -lrth /etc/cron.d" \
-  "ls -lrth /etc/cron.hourly" \
-  "ls -lrth /etc/cron.daily" \
-  "ls -lrth /etc/cron.weekly" \
-  "ls -lrth /etc/cron.monthly" \
-  "##### PROCESSES AND SERVICES #####\n" \
-  "ls -lrth /etc/*.d" \
-  "service --status-all" \
-  "ps -ewo %p%P%C%x%t%U%u%c%a" \
-  "jobs -l" \
-  "##### FILES #####\n" \
-  "lsof" \
-  "lsof -i" \
-  "find / \\( -nouser -o -nogroup \\) -exec ls -lah {} +" \
-  "lsattr / -R | grep '\\----i'" \
-  "##### MISC #####\n" \
-  "ls -lrtha /tmp" \
-  "find / -name 'authorized_keys'" \
-  "find /var/log -size 0b -exec ls -lah {} +" \
-  "find / -type p -exec ls -lah {} +"
+    FULLREPORT=full-system-report.log
+    ERRORLOG=full-system-report-error.log
+    echo "Report generated at `date`" >> $FULLREPORT
+    echo "Running as `whoami`" >> $FULLREPORT
+    ( for i in \
+    "##### SYSTEM #####\n" \
+    "uname -a" \
+    "uptime" \
+    "df -h" \
+    "fdisk -l" \
+    "mount -l" \
+    "cat /etc/fstab" \
+    "free" \
+    "lsusb" \
+    "lsmod" \
+    "env" \
+    "set | grep 'LD_PRELOAD'" \
+    "##### NETWORKING #####\n" \
+    "hostname" \
+    "ip a" \
+    "ip link show" \
+    "cat /etc/network/interfaces" \
+    "ip r s" \
+    "ip n" \
+    "cat /etc/hosts" \
+    "cat /etc/resolv.conf" \
+    "ss -putan" \
+    "##### USERS #####\n" \
+    "who -a" \
+    "lastlog" \
+    "grep -E ':0+' /etc/passwd" \
+    "getent passwd {1000..65535}" \
+    "cat /etc/sudoers" \
+    "ls -lrth /etc/cron.d" \
+    "ls -lrth /etc/cron.hourly" \
+    "ls -lrth /etc/cron.daily" \
+    "ls -lrth /etc/cron.weekly" \
+    "ls -lrth /etc/cron.monthly" \
+    "##### PROCESSES AND SERVICES #####\n" \
+    "ls -lrth /etc/*.d" \
+    "service --status-all" \
+    "ps -ewo %p%P%C%x%t%U%u%c%a" \
+    "jobs -l" \
+    "##### FILES #####\n" \
+    "lsof" \
+    "lsof -i" \
+    "find / \\( -nouser -o -nogroup \\) -exec ls -lah {} +" \
+    "lsattr / -R | grep '\\----i'" \
+    "##### MISC #####\n" \
+    "ls -lrtha /tmp" \
+    "find / -name 'authorized_keys'" \
+    "find /var/log -size 0b -exec ls -lah {} +" \
+    "find / -type p -exec ls -lah {} +"
 
-  do
-    echo -e "\n\n[+] $i\n-----------------------------------"
-    eval $i 2>> $ERRORLOGS
-  done) >> $FULLREPORT
+    do
+        echo -e "\n\n[+] $i\n-----------------------------------"
+        eval $i 2>> $ERRORLOG
+    done) >> $FULLREPORT
+
+    ERRORLOGS=error_logs.log
+    cat /var/log/dmesg > dmesg.log 2>> $ERRORLOGS
+    cat /var/log/auth.log > auth.log 2>> $ERRORLOGS
+    cat /var/log/dpkg.log > dpkg.log 2>> $ERRORLOGS
+    cat /var/log/kern.log > kern.log 2>> $ERRORLOGS
+    cat /var/log/lastlog > lastlog.log 2>> $ERRORLOGS
+    cat /var/log/syslog > syslog.log 2>> $ERRORLOGS
+    cat /var/log/alternative.log > alternative.log 2>> $ERRORLOGS
+    cat /var/log/cron.log > cron.log 2>> $ERRORLOGS
+    cat /var/log/messages > messages.log 2>> $ERRORLOGS
+    cat /var/log/debug > debug.log 2>> $ERRORLOGS
+    cat /var/log/daemon.log > daemon.log 2>> $ERRORLOGS
+    cat /var/log/boot.log > boot.log 2>> $ERRORLOGS
+    cat /var/log/user.log > user.log 2>> $ERRORLOGS
+    cat /var/log/apache2/access.log > apache_access.log 2>> $ERRORLOGS
+  
 }
 
-while getopts u:p:f:ah opt; do
-  case "$opt" in
-    u|--user)   USR=$OPTARG
-                if grep -qw ^$USR /etc/passwd; then
-                  user
-                else
-                  echo "ERROR: This user does not exist.";
-                  exit 1
-                fi
-                ;;
-    p|--pid)    PID=$OPTARG
-                if ps -p $PID > /dev/null; then
-                  pid
-                else
-                  echo "ERROR: This pid does not exist.";
-                  exit 1
-                fi
-                ;;
-    f|--file)   FILE=$OPTARG
-                if [ ! -f $FILE ]; then
-                  echo "ERROR: This file does not exist.";
-                  exit 1;
-                fi
-                f
-                ;;
-    a|--all) all
-                ;;
-    h|--help)   usage
-                exit 0
-                ;;
-    *)          usage
-                exit 1
-                ;;
-  esac
+while getopts u:p:f:lah opt; do
+    case "$opt" in
+        u|--user)   USR=$OPTARG
+                    if grep -qw ^$USR /etc/passwd; then
+                        user
+                    else
+                        echo "ERROR: This user does not exist.";
+                        exit 1
+                    fi
+                    ;;
+        p|--pid)    PID=$OPTARG
+                    if ps -p $PID > /dev/null; then
+                        pid
+                    else
+                        echo "ERROR: This pid does not exist.";
+                        exit 1
+                    fi
+                    ;;
+        f|--file)   FILE=$OPTARG
+                    if [ ! -f $FILE ]; then
+                        echo "ERROR: This file does not exist.";
+                        exit 1;
+                    fi
+                    f
+                    ;;
+        l|--logs)   logs
+                    ;;
+        a|--all)    all
+                    ;;
+        h|--help)   usage
+                    exit 0
+                    ;;
+        *)          usage
+                    exit 1
+                    ;;
+    esac
 done
 
-echo "[+] Report generated at $PWD"
+echo "[+] Report generated at $OUTDIR directory."
 echo "[+] Done!"
 exit 0
