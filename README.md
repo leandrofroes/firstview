@@ -76,6 +76,23 @@ fIRstview is a Debian based Incident Response automation script that collects se
 - Process environment
 - Process connections
 
+### Logs module
+
+- dmesg
+- auth.log
+- dpkg.log
+- kern.log
+- lastlog
+- syslog
+- alternative.log
+- cron.log
+- messages
+- debug
+- daemon.log
+- boot.log
+- user.log
+- apache2/httpd access.log
+
 ## **Options**
 
 ```
@@ -85,6 +102,8 @@ fIRstview is a Debian based Incident Response automation script that collects se
           Specify the process which you want to investigate and generate a report.
     -f,--file FILE
           Specify a file which you want to investigate and generate a report.
+    -l, --logs
+        Dump several system logs.
     -a,--all
           Generate a full report with no filter.
     -h,--help
@@ -99,11 +118,22 @@ cd firstview
 chmod +x fIRstview.sh
 ```
 
-## **Usage**
+## **Example**
 
 ```
-./fIRstview.sh -f /bin/ls
+./fIRstview.sh -u <username>
 ```
+
+## Version 0.3 new features:
+
+- New log collection module
+- Removed timestamp from the report file name
+- The report now is generated in an output directory created by the script
+
+### All module:
+
+- Now it has the log collection module embedded
+
 
 ## Version 0.2 new features:
 
