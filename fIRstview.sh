@@ -100,11 +100,12 @@ user(){
         eval $i 2>> $ERRORLOG
     done) >> $USERREPORT
 
-    cat /home/$USR/.bash_history > $USR-user-history.log
-    cat ~$USR/.ssh/known_hosts > $USR-user-known_hosts.log
-    cat ~$USR/.bashrc > $USR-user-bashrc.log
-    cat ~$USR/.profile > $USR-user-profile.log
-    cat ~$USR/.bash_logout > $USR-user-bash_logout.log
+    ERRORLOGS=user-home-files-error.log
+    cat /home/$USR/.bash_history > $USR-user-history.log 2>> $ERRORLOGS
+    cat ~$USR/.ssh/known_hosts > $USR-user-known_hosts.log 2>> $ERRORLOGS
+    cat ~$USR/.bashrc > $USR-user-bashrc.log 2>> $ERRORLOGS
+    cat ~$USR/.profile > $USR-user-profile.log 2>> $ERRORLOGS
+    cat ~$USR/.bash_logout > $USR-user-bash_logout.log 2>> $ERRORLOGS
 }
 
 pid(){
