@@ -24,7 +24,7 @@ usage(){
     cat << EOF
 
 	NAME:
-	    fIRstview - fIRstview is a Linux Incident Response tool that gives you a first view and collects useful information to your Forensic Analysis.
+	    fIRstview - fIRstview is a Live Response/Incident Response automation tool that collects several information from a Linux based system.
 
 	SYNOPSIS:
 	    fIRstview.sh [-h] [-a] [-l] [-u USER] [-p PID] [-f FILE]
@@ -52,7 +52,7 @@ if [ $# -eq 0  ]; then
   exit 1
 fi
 
-OUTDIR="fIRstview_output"
+OUTDIR=$PWD/fIRstview_output
 
 [[ ! -d $OUTDIR ]] && mkdir $OUTDIR
 
@@ -264,6 +264,8 @@ while getopts u:p:f:lah opt; do
     esac
 done
 
-echo "[+] Report generated at $OUTDIR directory."
+cd ..
+zip -P novirus -r fIRstview_output.zip $OUTDIR > /dev/null
+echo "[+] Report generated at $PWD."
 echo "[+] Done!"
 exit 0
