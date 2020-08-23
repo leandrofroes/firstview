@@ -59,7 +59,7 @@ OUTDIR="fIRstview_output"
 cd $OUTDIR
 
 f(){
-    FILEREPORT=$(echo $FILE | rev | cut -d/ -f1 | rev)-file-report.log
+    FILEREPORT=$(echo $FILE | rev | cut -d/ -f1 | rev)-file-report
     ERRORLOG=$(echo $FILE | rev | cut -d/ -f1 | rev)-file-report-error.log
     echo "Report generated at `date`" >> $FILEREPORT
     echo "Running as `whoami`" >> $FILEREPORT
@@ -79,7 +79,7 @@ f(){
 }
 
 user(){
-    USERREPORT=$USR-report.log
+    USERREPORT=$USR-report
     ERRORLOG=$USR-report-error.log
     echo "Report generated at `date`" >> $USERREPORT
     echo "Running as `whoami`" >> $USERREPORT
@@ -109,7 +109,7 @@ user(){
 }
 
 pid(){
-    PIDREPORT=$PID-pid-report.log
+    PIDREPORT=$PID-pid-report
     ERRORLOG=$PID-pid-report-error.log
     echo "Report generated at `date`" >> $PIDREPORT
     echo "Running as `whoami`" >> $PIDREPORT
@@ -148,7 +148,7 @@ logs(){
 }
 
 all(){
-    FULLREPORT=full-system-report.log
+    FULLREPORT=full-system-report
     ERRORLOG=full-system-report-error.log
     echo "Report generated at `date`" >> $FULLREPORT
     echo "Running as `whoami`" >> $FULLREPORT
@@ -175,6 +175,7 @@ all(){
     "cat /etc/hosts" \
     "cat /etc/resolv.conf" \
     "ss -putan" \
+    "iptables -L" \
     "##### USERS #####\n" \
     "who -a" \
     "lastlog" \
