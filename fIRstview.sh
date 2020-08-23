@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#   fIRstview - fIRstview is a Linux Incident Response automation script that collects several artefacts on your system.
+#   fIRstview - fIRstview is a Live Response/Incident Response automation tool that collects several information from a Linux based system.
 #
 #   Author: Leandro Fróes
 #
@@ -18,19 +18,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-[[ $EUID -ne 0 ]] && echo "[!] Running as a non-root user!"
+[[ $EUID -ne 0 ]] && echo "[!] You must be root!" && exit 1
 
 usage(){
     cat << EOF
+NAME:
+	fIRstview - fIRstview is a Live Response/Incident Response automation tool that collects several information from a Linux based system.
 
-	NAME:
-	    fIRstview - fIRstview is a Live Response/Incident Response automation tool that collects several information from a Linux based system.
+SYNOPSIS:
+	fIRstview.sh [-h] [-a] [-l] [-u USER] [-p PID] [-f FILE]
 
-	SYNOPSIS:
-	    fIRstview.sh [-h] [-a] [-l] [-u USER] [-p PID] [-f FILE]
-
-	OPTIONS:
-
+OPTIONS:
 	-u,--user USER
 		Specify the user which you want to investigate and generate a report.
 	-p,--pid PID
