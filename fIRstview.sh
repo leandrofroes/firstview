@@ -131,6 +131,7 @@ logs(){
     ERRORLOGS=error_logs.log
     cat /var/log/dmesg > dmesg.log 2>> $ERRORLOGS
     cat /var/log/auth.log > auth.log 2>> $ERRORLOGS
+    cat /var/log/secure > secure.log 2>> $ERRORLOGS
     cat /var/log/dpkg.log > dpkg.log 2>> $ERRORLOGS
     cat /var/log/kern.log > kern.log 2>> $ERRORLOGS
     cat /var/log/lastlog > lastlog.log 2>> $ERRORLOGS
