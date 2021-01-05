@@ -81,6 +81,7 @@ fIRstview is a Live Response/Incident Response automation tool that collects sev
 
 - dmesg
 - auth.log
+- secure
 - dpkg.log
 - kern.log
 - lastlog
